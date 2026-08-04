@@ -1,0 +1,56 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notification-service
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/notification_service}
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  cache:
+    type: simple
+
+jwt:
+  secret: ${JWT_SECRET:change-this-to-a-long-random-secret-at-least-256-bits}
+  mobile-claim: mobileNumber
+
+firebase:
+  enabled: ${FIREBASE_ENABLED:true}
+  credentials-path: ${FIREBASE_CREDENTIALS_PATH:firebase-service-account.json}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.company.notification: INFO
+    org.springframework.web.socket: INFO

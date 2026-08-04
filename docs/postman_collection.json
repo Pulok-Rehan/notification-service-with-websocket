@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "Notification Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8085" },
+    { "key": "token", "value": "PASTE_JWT_HERE" },
+    { "key": "mobile", "value": "8801711000000" }
+  ],
+  "item": [
+    {
+      "name": "Send Unicast",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/notifications/unicast",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Attendance Approved\",\n  \"body\": \"Your attendance for today has been approved.\",\n  \"notificationType\": \"ATTENDANCE\",\n  \"priority\": \"NORMAL\",\n  \"receiverMobile\": \"{{mobile}}\",\n  \"data\": { \"module\": \"attendance\", \"entityId\": \"ATT001\" }\n}"
+        }
+      }
+    },
+    {
+      "name": "Send Multicast",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/notifications/multicast",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Team Meeting\",\n  \"body\": \"Meeting at 5 PM\",\n  \"notificationType\": \"INFO\",\n  \"receiverMobiles\": [\"8801711000000\", \"8801711000001\"]\n}"
+        }
+      }
+    },
+    {
+      "name": "Send Broadcast",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/notifications/broadcast",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"System Maintenance\",\n  \"body\": \"Service will be down at midnight\",\n  \"notificationType\": \"SYSTEM\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Send To Topic",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/notifications/topic",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"IPO Open\",\n  \"body\": \"New IPO is now open for application\",\n  \"topic\": \"ipo\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Send To Role",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/notifications/role",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"RM Briefing\",\n  \"body\": \"Please check the new client list\",\n  \"role\": \"RM\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get History",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/notifications/history?mobile={{mobile}}&page=0&size=20"
+      }
+    },
+    {
+      "name": "Get Unread Count",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/users/{{mobile}}/unread-count"
+      }
+    },
+    {
+      "name": "Mark As Read",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/notifications/read/REPLACE_NOTIFICATION_ID"
+      }
+    },
+    {
+      "name": "Mark All Read",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/notifications/read-all?mobile={{mobile}}"
+      }
+    },
+    {
+      "name": "Register FCM Token",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/tokens/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mobile\": \"{{mobile}}\",\n  \"deviceId\": \"device-123\",\n  \"deviceType\": \"ANDROID\",\n  \"fcmToken\": \"sample-fcm-token\",\n  \"appVersion\": \"1.0.0\",\n  \"platform\": \"android\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Subscribe Topic",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/topics/subscribe",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mobile\": \"{{mobile}}\",\n  \"topic\": \"attendance\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Presence",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/presence/{{mobile}}"
+      }
+    },
+    {
+      "name": "Online Users",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/presence/online"
+      }
+    }
+  ]
+}
