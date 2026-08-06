@@ -7,14 +7,14 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/notification_service}
+      uri: mongodb://10.7.93.19:27017/onboarding
+    redis:
+      host: 10.7.93.19
+      port: 6379
 
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: 10.7.93.19:9092
     consumer:
       group-id: notification-service
       auto-offset-reset: earliest
@@ -53,4 +53,10 @@ springdoc:
 logging:
   level:
     com.company.notification: INFO
-    org.springframework.web.socket: INFO
+#    org.springframework.web.socket: INFO
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.web.socket.messaging: DEBUG
+
+frontEndUrl: http://10.20.242.202:3000,http://localhost:3000,http://localhost:5175
+

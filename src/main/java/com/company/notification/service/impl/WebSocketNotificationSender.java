@@ -7,6 +7,10 @@ import com.company.notification.redis.PresenceService;
 import com.company.notification.service.NotificationSender;
 import com.company.notification.websocket.WebSocketNotifier;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,11 +20,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class WebSocketNotificationSender implements NotificationSender {
 
     private final WebSocketNotifier webSocketNotifier;
     private final PresenceService presenceService;
     private final NotificationMapper notificationMapper;
+    @Autowired
+    private SimpUserRegistry simpUserRegistry;
 
     @Override
     public NotificationChannel getChannel() {
@@ -45,8 +52,16 @@ public class WebSocketNotificationSender implements NotificationSender {
             });
             return;
         }
+        log.info("Connected users: {}", simpUserRegistry.getUsers());
+
+        SimpUser user = simpUserRegistry.getUser(notification.getReceiverMobile());
+
+        log.info("User found = {}", user);
+        log.info("User {} is online: {}", notification.getReceiverMobile(), presenceService.isOnline(notification.getReceiverMobile()));
         if (notification.getReceiverMobile() != null && presenceService.isOnline(notification.getReceiverMobile())) {
+            log.info("Sending notification to user {}", notification.getReceiverMobile());
             webSocketNotifier.sendToUser(notification.getReceiverMobile(), notificationMapper.toResponse(notification));
+            log.info("Notification sent to user {}", notification.getReceiverMobile());
         }
     }
 }

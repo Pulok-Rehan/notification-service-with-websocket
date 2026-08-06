@@ -3,6 +3,7 @@ package com.company.notification.websocket;
 import com.company.notification.dto.NotificationResponse;
 import com.company.notification.dto.WebSocketUpdateMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
  * Single point of truth for pushing frames to STOMP destinations. Used both by the
  * notification send path and by the database-change-event listener (live data updates).
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WebSocketNotifier {
@@ -17,11 +19,12 @@ public class WebSocketNotifier {
     private final SimpMessagingTemplate messagingTemplate;
 
     public void sendToUser(String mobile, NotificationResponse notification) {
-        messagingTemplate.convertAndSendToUser(mobile, "/notifications", notification);
+        log.info("Sending notification to user: {}", mobile);
+        messagingTemplate.convertAndSendToUser(mobile, "/queue/notifications", notification);
     }
 
     public void sendUnreadCount(String mobile, long unreadCount) {
-        messagingTemplate.convertAndSendToUser(mobile, "/updates", new java.util.HashMap<>() {{
+        messagingTemplate.convertAndSendToUser(mobile, "/queue/updates", new java.util.HashMap<>() {{
             put("eventType", "UNREAD_COUNT");
             put("unreadCount", unreadCount);
         }});
@@ -40,6 +43,6 @@ public class WebSocketNotifier {
     }
 
     public void sendUserUpdate(String mobile, WebSocketUpdateMessage message) {
-        messagingTemplate.convertAndSendToUser(mobile, "/updates", message);
+        messagingTemplate.convertAndSendToUser(mobile, "/queue/updates", message);
     }
 }

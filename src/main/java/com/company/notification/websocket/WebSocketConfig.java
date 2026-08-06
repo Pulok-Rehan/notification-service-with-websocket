@@ -2,6 +2,7 @@ package com.company.notification.websocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
@@ -21,7 +22,9 @@ import org.springframework.web.socket.config.annotation.*;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketAuthChannelInterceptor authChannelInterceptor;
+//    private final WebSocketAuthChannelInterceptor authChannelInterceptor;
+
+    private final MobileAuthChannelInterceptor mobileAuthChannelInterceptor;
     private final PresenceWebSocketEventListener presenceEventListener; // ensures bean wiring/eager init
 
     @Override
@@ -41,8 +44,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("*");
     }
 
+//    @Override
+//    public void configureClientInboundChannel(org.springframework.messaging.simp.config.ChannelRegistration registration) {
+
+    /// /        registration.interceptors(authChannelInterceptor);
+//    }
     @Override
-    public void configureClientInboundChannel(org.springframework.messaging.simp.config.ChannelRegistration registration) {
-        registration.interceptors(authChannelInterceptor);
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(mobileAuthChannelInterceptor);
     }
 }

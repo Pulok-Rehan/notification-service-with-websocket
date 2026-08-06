@@ -7,5 +7,5 @@ package com.company.notification.enums;
  * touching existing notification logic.
  */
 public enum NotificationChannel {
-    PUSH, WEBSOCKET, IN_APP, EMAIL, SMS, WHATSAPP, APNS, WEB_PUSH
+    PUSH, WEBSOCKET, IN_APP, EMAIL, SMS, WHATSAPP, APNS, WEB_PUSH, CLIENT_PORTAL
 }
