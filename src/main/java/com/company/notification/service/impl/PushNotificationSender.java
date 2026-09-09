@@ -52,6 +52,7 @@ public class PushNotificationSender implements NotificationSender {
                 List<FcmToken> tokens = fcmTokenRepository.findByMobileAndActiveTrue(notification.getReceiverMobile());
                 for (FcmToken t : tokens) {
                     firebasePushService.sendToToken(t.getFcmToken(), notification);
+                    log.info("FCM message sent to device {} for notification {}", t.getFcmToken(), notification.getId());
                 }
             }
         } catch (FirebaseMessagingException e) {

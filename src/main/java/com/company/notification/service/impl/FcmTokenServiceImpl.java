@@ -16,17 +16,36 @@ public class FcmTokenServiceImpl implements FcmTokenService {
 
     private final FcmTokenRepository fcmTokenRepository;
 
-    @Override
+//    @Override
+//    public FcmToken register(FcmTokenRequest request) {
+//        FcmToken token = fcmTokenRepository.findByMobileAndDeviceId(request.getMobile(), request.getDeviceId())
+//                .orElse(FcmToken.builder().mobile(request.getMobile()).deviceId(request.getDeviceId())
+//                        .createdAt(Instant.now()).build());
+//        token.setDeviceType(request.getDeviceType());
+//        token.setFcmToken(request.getFcmToken());
+//        token.setAppVersion(request.getAppVersion());
+//        token.setPlatform(request.getPlatform());
+//        token.setActive(true);
+//        token.setUpdatedAt(Instant.now());
+//        return fcmTokenRepository.save(token);
+//    }
+
     public FcmToken register(FcmTokenRequest request) {
-        FcmToken token = fcmTokenRepository.findByMobileAndDeviceId(request.getMobile(), request.getDeviceId())
-                .orElse(FcmToken.builder().mobile(request.getMobile()).deviceId(request.getDeviceId())
-                        .createdAt(Instant.now()).build());
-        token.setDeviceType(request.getDeviceType());
+
+        FcmToken token = fcmTokenRepository
+                .findByMobile(request.getMobile())
+                .orElseGet(() -> FcmToken.builder()
+                        .mobile(request.getMobile())
+                        .createdAt(Instant.now())
+                        .build());
+
         token.setFcmToken(request.getFcmToken());
+        token.setDeviceType(request.getDeviceType());
         token.setAppVersion(request.getAppVersion());
         token.setPlatform(request.getPlatform());
         token.setActive(true);
         token.setUpdatedAt(Instant.now());
+
         return fcmTokenRepository.save(token);
     }
 

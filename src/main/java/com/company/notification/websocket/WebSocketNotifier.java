@@ -24,10 +24,12 @@ public class WebSocketNotifier {
     }
 
     public void sendUnreadCount(String mobile, long unreadCount) {
+        log.info("Sending unread count to user: {}", mobile);
         messagingTemplate.convertAndSendToUser(mobile, "/queue/updates", new java.util.HashMap<>() {{
             put("eventType", "UNREAD_COUNT");
             put("unreadCount", unreadCount);
         }});
+        log.info("Sent unread count to user: {}", mobile);
     }
 
     public void broadcast(NotificationResponse notification) {
