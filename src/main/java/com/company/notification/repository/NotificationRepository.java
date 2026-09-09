@@ -18,6 +18,8 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
     long countByReceiverMobileAndStatusNotAndDeletedFalse(String receiverMobile, NotificationStatus status);
 
+    long countByReceiverMobileAndReadAtIsNullAndDeletedFalse(String receiverMobile);
+
     List<Notification> findByReceiverMobileAndCreatedAtAfterAndDeletedFalse(String receiverMobile, Instant after);
 
     List<Notification> findByScheduledAtBeforeAndStatus(Instant before, NotificationStatus status);

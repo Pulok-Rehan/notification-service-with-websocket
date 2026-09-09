@@ -31,6 +31,7 @@ class NotificationServiceImplTest {
     @Mock private WebSocketNotifier webSocketNotifier;
     @Mock private PresenceService presenceService;
     @Mock private RoleDirectoryService roleDirectoryService;
+    @Mock private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
     private NotificationServiceImpl notificationService;
 
@@ -38,7 +39,7 @@ class NotificationServiceImplTest {
     void setUp() {
         notificationService = new NotificationServiceImpl(
                 notificationRepository, notificationMapper, List.of(pushSender),
-                unreadCountService, webSocketNotifier, presenceService, roleDirectoryService);
+                unreadCountService, webSocketNotifier, presenceService, roleDirectoryService, mongoTemplate);
     }
 
     @Test

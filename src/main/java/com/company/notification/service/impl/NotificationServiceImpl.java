@@ -14,14 +14,15 @@ import com.company.notification.service.RoleDirectoryService;
 import com.company.notification.websocket.WebSocketNotifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Page;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +42,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
+    private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
     private final List<NotificationSender> senders;
@@ -48,6 +52,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final WebSocketNotifier webSocketNotifier;
     private final PresenceService presenceService;
     private final RoleDirectoryService roleDirectoryService;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public NotificationResponse sendUnicast(NotificationRequest request) {
@@ -165,34 +170,59 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public PageResponse<NotificationResponse> getHistory(String mobile, NotificationHistoryFilter filter) {
-        PageRequest pageRequest = PageRequest.of(
-                Math.max(filter.getPage(), 0),
-                filter.getSize() > 0 ? filter.getSize() : 20,
-                Sort.by(Sort.Direction.DESC, "createdAt"));
+        int page = Math.max(filter.getPage(), 0);
+        int size = filter.getSize() > 0 ? Math.min(filter.getSize(), MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
 
-        Page<Notification> page;
+        Query query = new Query();
+        query.addCriteria(Criteria.where("receiverMobile").is(mobile).and("deleted").ne(true));
+
         if (filter.getStatus() != null) {
-            page = notificationRepository.findByReceiverMobileAndStatusAndDeletedFalseOrderByCreatedAtDesc(
-                    mobile, filter.getStatus(), pageRequest);
-        } else {
-            page = notificationRepository.findByReceiverMobileAndDeletedFalseOrderByCreatedAtDesc(mobile, pageRequest);
+            query.addCriteria(Criteria.where("status").is(filter.getStatus()));
+        }
+        if (filter.getType() != null) {
+            query.addCriteria(Criteria.where("notificationType").is(filter.getType()));
+        }
+        if (filter.getRead() != null) {
+            if (Boolean.TRUE.equals(filter.getRead())) {
+                query.addCriteria(Criteria.where("readAt").ne(null));
+            } else {
+                query.addCriteria(Criteria.where("readAt").is(null));
+            }
+        }
+        if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
+            String escaped = Pattern.quote(filter.getSearch().trim());
+            query.addCriteria(new Criteria().orOperator(
+                    Criteria.where("title").regex(escaped, "i"),
+                    Criteria.where("body").regex(escaped, "i")));
+        }
+        if (filter.getFromDate() != null || filter.getToDate() != null) {
+            Criteria dateCriteria = Criteria.where("createdAt");
+            if (filter.getFromDate() != null) {
+                dateCriteria = dateCriteria.gte(filter.getFromDate());
+            }
+            if (filter.getToDate() != null) {
+                dateCriteria = dateCriteria.lte(filter.getToDate());
+            }
+            query.addCriteria(dateCriteria);
         }
 
-        List<NotificationResponse> content = page.getContent().stream()
-                .filter(n -> filter.getType() == null || filter.getType() == n.getNotificationType())
-                .filter(n -> filter.getRead() == null || (filter.getRead() == (n.getReadAt() != null)))
-                .filter(n -> filter.getSearch() == null || filter.getSearch().isBlank()
-                        || (n.getTitle() != null && n.getTitle().toLowerCase().contains(filter.getSearch().toLowerCase()))
-                        || (n.getBody() != null && n.getBody().toLowerCase().contains(filter.getSearch().toLowerCase())))
+        long total = mongoTemplate.count(query, Notification.class);
+
+        query.with(Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("_id")));
+        query.skip((long) page * size).limit(size);
+
+        List<NotificationResponse> content = mongoTemplate.find(query, Notification.class).stream()
                 .map(notificationMapper::toResponse)
                 .collect(Collectors.toList());
 
+        int totalPages = (int) Math.ceil((double) total / size);
+
         return PageResponse.<NotificationResponse>builder()
                 .content(content)
-                .page(page.getNumber())
-                .size(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
+                .page(page)
+                .size(size)
+                .totalElements(total)
+                .totalPages(totalPages)
                 .build();
     }
 
@@ -263,14 +293,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public UnreadCountResponse getUnreadCount(String mobile) {
-        long cached = unreadCountService.get(mobile);
-        if (cached == 0) {
-            // self-heal from Mongo truth in case Redis was flushed/cold
-            long fromDb = notificationRepository.countByReceiverMobileAndStatusNotAndDeletedFalse(mobile, NotificationStatus.READ);
-            unreadCountService.set(mobile, fromDb);
-            return UnreadCountResponse.builder().unreadCount(fromDb).build();
-        }
-        return UnreadCountResponse.builder().unreadCount(cached).build();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("receiverMobile").is(mobile)
+                .and("deleted").ne(true)
+                .and("readAt").is(null)
+                .and("status").nin(List.of(NotificationStatus.EXPIRED, NotificationStatus.DELETED)));
+        long fromDb = mongoTemplate.count(query, Notification.class);
+        unreadCountService.set(mobile, fromDb);
+        return UnreadCountResponse.builder().unreadCount(fromDb).build();
     }
 
     /**
