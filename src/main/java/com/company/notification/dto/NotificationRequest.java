@@ -39,8 +39,8 @@ public class NotificationRequest {
     private String sender;
 
     // targeting - populated depending on the endpoint used
-    private String receiverMobile;        // unicast
-    private List<String> receiverMobiles; // multicast
+    private String receiverPlatformId;        // unicast
+    private List<String> receiverPlatformIds; // multicast
     private String topic;                 // topic
     private String role;                  // role
 

@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FcmTokenRepository extends MongoRepository<FcmToken, String> {
-    List<FcmToken> findByMobileAndActiveTrue(String mobile);
-    Optional<FcmToken> findByMobileAndDeviceId(String mobile, String deviceId);
-    void deleteByMobileAndDeviceId(String mobile, String deviceId);
-    List<FcmToken> findByMobileInAndActiveTrue(List<String> mobiles);
-    Optional<FcmToken> findByMobile(String mobile);
+    List<FcmToken> findByPlatformIdAndActiveTrue(String platformId);
+    Optional<FcmToken> findByPlatformIdAndDeviceId(String platformId, String deviceId);
+    void deleteByPlatformIdAndDeviceId(String platformId, String deviceId);
+    List<FcmToken> findByPlatformIdInAndActiveTrue(List<String> platformIds);
+    Optional<FcmToken> findByPlatformId(String platformId);
 }

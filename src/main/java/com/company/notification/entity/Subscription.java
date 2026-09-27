@@ -18,7 +18,7 @@ public class Subscription {
     private String id;
 
     @Indexed
-    private String mobile;
+    private String platformId;
 
     @Indexed
     private String topic;

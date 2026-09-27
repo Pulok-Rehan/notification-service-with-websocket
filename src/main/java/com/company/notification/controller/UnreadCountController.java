@@ -15,8 +15,8 @@ public class UnreadCountController {
 
     private final NotificationService notificationService;
 
-    @GetMapping("/{mobile}/unread-count")
-    public ApiResponse<UnreadCountResponse> unreadCount(@PathVariable String mobile) {
-        return ApiResponse.success(notificationService.getUnreadCount(mobile));
+    @GetMapping("/{platformId}/unread-count")
+    public ApiResponse<UnreadCountResponse> unreadCount(@PathVariable String platformId) {
+        return ApiResponse.success(notificationService.getUnreadCount(platformId));
     }
 }

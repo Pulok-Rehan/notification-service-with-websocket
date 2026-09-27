@@ -38,9 +38,9 @@ public class PushNotificationSender implements NotificationSender {
                 firebasePushService.sendToTopic(topic, notification);
                 return;
             }
-            if (notification.isMulticast() && notification.getReceiverMobiles() != null) {
-                List<String> tokens = notification.getReceiverMobiles().stream()
-                        .flatMap(m -> fcmTokenRepository.findByMobileAndActiveTrue(m).stream())
+            if (notification.isMulticast() && notification.getReceiverPlatformIds() != null) {
+                List<String> tokens = notification.getReceiverPlatformIds().stream()
+                        .flatMap(p -> fcmTokenRepository.findByPlatformIdAndActiveTrue(p).stream())
                         .map(FcmToken::getFcmToken)
                         .toList();
                 if (!tokens.isEmpty()) {
@@ -48,8 +48,8 @@ public class PushNotificationSender implements NotificationSender {
                 }
                 return;
             }
-            if (notification.getReceiverMobile() != null) {
-                List<FcmToken> tokens = fcmTokenRepository.findByMobileAndActiveTrue(notification.getReceiverMobile());
+            if (notification.getReceiverPlatformId() != null) {
+                List<FcmToken> tokens = fcmTokenRepository.findByPlatformIdAndActiveTrue(notification.getReceiverPlatformId());
                 for (FcmToken t : tokens) {
                     firebasePushService.sendToToken(t.getFcmToken(), notification);
                     log.info("FCM message sent to device {} for notification {}", t.getFcmToken(), notification.getId());

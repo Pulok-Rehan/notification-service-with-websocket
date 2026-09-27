@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface SubscriptionRepository extends MongoRepository<Subscription, String> {
-    List<Subscription> findByMobile(String mobile);
+    List<Subscription> findByPlatformId(String platformId);
     List<Subscription> findByTopic(String topic);
-    boolean existsByMobileAndTopic(String mobile, String topic);
-    void deleteByMobileAndTopic(String mobile, String topic);
+    boolean existsByPlatformIdAndTopic(String platformId, String topic);
+    void deleteByPlatformIdAndTopic(String platformId, String topic);
 }

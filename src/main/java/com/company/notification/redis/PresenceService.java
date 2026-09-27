@@ -24,38 +24,38 @@ public class PresenceService {
 
     private final StringRedisTemplate redisTemplate;
 
-    public void markOnline(String mobile, String sessionId, String device, String ip) {
-        redisTemplate.opsForValue().set(RedisKeys.session(mobile), sessionId, 24, TimeUnit.HOURS);
-        redisTemplate.opsForSet().add(RedisKeys.ONLINE_USERS_SET, mobile);
-        redisTemplate.opsForSet().add(todayKey(), mobile);
+    public void markOnline(String platformId, String sessionId, String device, String ip) {
+        redisTemplate.opsForValue().set(RedisKeys.session(platformId), sessionId, 24, TimeUnit.HOURS);
+        redisTemplate.opsForSet().add(RedisKeys.ONLINE_USERS_SET, platformId);
+        redisTemplate.opsForSet().add(todayKey(), platformId);
         redisTemplate.expire(todayKey(), 1, TimeUnit.DAYS);
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "status", PresenceStatus.ONLINE.name());
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "lastSeen", Instant.now().toString());
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "device", device == null ? "" : device);
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "ip", ip == null ? "" : ip);
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "status", PresenceStatus.ONLINE.name());
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "lastSeen", Instant.now().toString());
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "device", device == null ? "" : device);
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "ip", ip == null ? "" : ip);
     }
 
-    public void markOffline(String mobile) {
-        redisTemplate.opsForSet().remove(RedisKeys.ONLINE_USERS_SET, mobile);
-        redisTemplate.delete(RedisKeys.session(mobile));
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "status", PresenceStatus.OFFLINE.name());
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "lastSeen", Instant.now().toString());
+    public void markOffline(String platformId) {
+        redisTemplate.opsForSet().remove(RedisKeys.ONLINE_USERS_SET, platformId);
+        redisTemplate.delete(RedisKeys.session(platformId));
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "status", PresenceStatus.OFFLINE.name());
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "lastSeen", Instant.now().toString());
     }
 
-    public void updateStatus(String mobile, PresenceStatus status) {
-        redisTemplate.opsForHash().put(RedisKeys.presence(mobile), "status", status.name());
+    public void updateStatus(String platformId, PresenceStatus status) {
+        redisTemplate.opsForHash().put(RedisKeys.presence(platformId), "status", status.name());
     }
 
-    public boolean isOnline(String mobile) {
-        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(RedisKeys.ONLINE_USERS_SET, mobile));
+    public boolean isOnline(String platformId) {
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(RedisKeys.ONLINE_USERS_SET, platformId));
     }
 
-    public PresenceResponse getPresence(String mobile) {
-        Object status = redisTemplate.opsForHash().get(RedisKeys.presence(mobile), "status");
-        Object lastSeen = redisTemplate.opsForHash().get(RedisKeys.presence(mobile), "lastSeen");
-        Object device = redisTemplate.opsForHash().get(RedisKeys.presence(mobile), "device");
+    public PresenceResponse getPresence(String platformId) {
+        Object status = redisTemplate.opsForHash().get(RedisKeys.presence(platformId), "status");
+        Object lastSeen = redisTemplate.opsForHash().get(RedisKeys.presence(platformId), "lastSeen");
+        Object device = redisTemplate.opsForHash().get(RedisKeys.presence(platformId), "device");
         return PresenceResponse.builder()
-                .mobile(mobile)
+                .platformId(platformId)
                 .status(status == null ? PresenceStatus.OFFLINE : PresenceStatus.valueOf(status.toString()))
                 .lastSeen(lastSeen == null ? null : Instant.parse(lastSeen.toString()))
                 .device(device == null ? null : device.toString())

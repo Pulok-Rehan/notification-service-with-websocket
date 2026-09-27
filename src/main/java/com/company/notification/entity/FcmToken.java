@@ -19,7 +19,7 @@ public class FcmToken {
     private String id;
 
     @Indexed
-    private String mobile;
+    private String platformId;
 
     private String deviceId;
     private DeviceType deviceType;

@@ -2,7 +2,7 @@
 
 Centralized, event-driven Notification Service built with Java 21 + Spring Boot 3.x. Handles push notifications (Firebase), real-time WebSocket delivery, notification history, read/unread + unread-count, online presence, topic/role/broadcast/multicast notifications, and generic database-change events so frontends update live without polling.
 
-`mobileNumber` is the single identity key used everywhere: authentication, Firebase targeting, WebSocket sessions/subscriptions, unread counts, and presence.
+`platformId` is the single identity key used everywhere: authentication, Firebase targeting, WebSocket sessions/subscriptions, unread counts, and presence.
 
 ## Stack
 
@@ -34,7 +34,7 @@ response/     ApiResponse<T> wrapper used by all controllers
 
 1. Persists a `Notification` document (status `CREATED`) — this is the permanent history record.
 2. Fans the entity out to every Spring bean implementing `NotificationSender` (`PushNotificationSender`, `WebSocketNotificationSender`, `InAppNotificationSender`). Adding Email/SMS/WhatsApp/APNS/Web Push later is just a new `@Component` implementing that interface — no existing code changes, per your "Future Integrations" requirement.
-3. Marks the notification `SENT`, increments the receiver's Redis unread counter, and pushes the new count over `/user/{mobile}/updates`.
+3. Marks the notification `SENT`, increments the receiver's Redis unread counter, and pushes the new count over `/user/{platformId}/updates`.
 
 If the receiver is offline, `WebSocketNotificationSender` simply skips the live push (the record is already saved); pending notifications are redelivered through `NotificationServiceImpl#deliverPendingOnReconnect`, wired to the WebSocket connect event.
 
@@ -47,19 +47,19 @@ Any upstream microservice (Attendance, Deposit, Withdrawal, IPO, KYC, Profile, .
   "eventType": "APPROVED",
   "module": "attendance",
   "entityId": "ATT001",
-  "mobileNumber": "8801711000000",
+  "platformId": "8801711000000",
   "payload": { "status": "APPROVED" },
   "timestamp": "2026-06-30T10:00:00Z"
 }
 ```
 
-`DatabaseChangeEventListener` consumes it and fans out over STOMP to `/topic/{module}` (e.g. `/topic/attendance`, for screens/dashboards watching that module) and, if `mobileNumber` is set, directly to `/user/{mobile}/updates` for that specific user. No per-module code is needed in this service — routing is purely by the `module` field. This is the **outbox/domain-event pattern**, not direct DB polling, per the architectural recommendation in your spec.
+`DatabaseChangeEventListener` consumes it and fans out over STOMP to `/topic/{module}` (e.g. `/topic/attendance`, for screens/dashboards watching that module) and, if `platformId` is set, directly to `/user/{platformId}/updates` for that specific user. No per-module code is needed in this service — routing is purely by the `module` field. This is the **outbox/domain-event pattern**, not direct DB polling, per the architectural recommendation in your spec.
 
 ## WebSocket
 
-Connect with STOMP+SockJS to `ws://host:8085/ws`, sending `Authorization: Bearer <jwt>` as a STOMP CONNECT header. `WebSocketAuthChannelInterceptor` extracts `mobileNumber` from the JWT and sets it as the STOMP principal, which is what makes `/user/{mobile}/notifications` and `/user/{mobile}/updates` work. Connect/disconnect events automatically update Redis presence.
+Connect with STOMP+SockJS to `ws://host:8085/ws`, sending `platformId: <id>` as a STOMP CONNECT header. `PlatformAuthChannelInterceptor` sets it as the STOMP principal, which is what makes `/user/{platformId}/notifications` and `/user/{platformId}/updates` work. Connect/disconnect events automatically update Redis presence.
 
-Topics: `/topic/global`, `/topic/{module}` (attendance, deposit, withdraw, ipo, dashboard, system, ...), `/user/{mobile}/notifications`, `/user/{mobile}/updates`.
+Topics: `/topic/global`, `/topic/{module}` (attendance, deposit, withdraw, ipo, dashboard, system, ...), `/user/{platformId}/notifications`, `/user/{platformId}/updates`.
 
 ## Running locally
 
@@ -104,12 +104,12 @@ Profiles: `dev`, `test`, `prod` (`--spring.profiles.active=prod`).
 See `docs/postman_collection.json` for ready-to-import requests, and Swagger UI for the full contract. Highlights:
 
 - `POST /notifications/unicast|multicast|broadcast|topic|role|schedule`
-- `GET /notifications/history?mobile=...&page=&size=&read=&search=`
+- `GET /notifications/history?platformId=...&page=&size=&read=&search=`
 - `PUT /notifications/read/{id}`, `/read-all`, `/unread/{id}`, `/archive/{id}`
-- `GET /users/{mobile}/unread-count`
-- `POST /tokens/register`, `PUT /tokens/update`, `DELETE /tokens`, `GET /tokens/{mobile}`
-- `POST /topics/subscribe|unsubscribe`, `GET /topics/{mobile}`
-- `GET /presence/{mobile}`, `/presence/online`, `/presence/count`
+- `GET /users/{platformId}/unread-count`
+- `POST /tokens/register`, `PUT /tokens/update`, `DELETE /tokens`, `GET /tokens/{platformId}`
+- `POST /topics/subscribe|unsubscribe`, `GET /topics/{platformId}`
+- `GET /presence/{platformId}`, `/presence/online`, `/presence/count`
 - `POST /admin/broadcast`, `/admin/system-alert`, `GET /admin/statistics`
 
 ## Mongo indexes

@@ -50,14 +50,14 @@ public class NotificationController {
 
     @GetMapping("/history")
     public ApiResponse<PageResponse<NotificationResponse>> history(
-            @RequestParam String mobile,
+            @RequestParam String platformId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Boolean read,
             @RequestParam(required = false) String search) {
         NotificationHistoryFilter filter = NotificationHistoryFilter.builder()
                 .page(page).size(size).read(read).search(search).build();
-        return ApiResponse.success(notificationService.getHistory(mobile, filter));
+        return ApiResponse.success(notificationService.getHistory(platformId, filter));
     }
 
     @GetMapping("/{id}")
@@ -77,8 +77,8 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    public ApiResponse<Void> markAllRead(@RequestParam String mobile) {
-        notificationService.markAllAsRead(mobile);
+    public ApiResponse<Void> markAllRead(@RequestParam String platformId) {
+        notificationService.markAllAsRead(platformId);
         return ApiResponse.success(null);
     }
 

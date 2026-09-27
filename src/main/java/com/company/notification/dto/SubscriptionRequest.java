@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class SubscriptionRequest {
     @NotBlank
-    private String mobile;
+    private String platformId;
     @NotBlank
     private String topic;
 }

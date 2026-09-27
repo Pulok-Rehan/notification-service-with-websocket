@@ -19,7 +19,7 @@ public class DatabaseChangeEvent {
     private String eventType;    // e.g. CREATED, UPDATED, APPROVED, REJECTED
     private String module;       // e.g. attendance, deposit, withdraw, ipo, kyc, profile
     private String entityId;
-    private String mobileNumber; // target user, nullable for broadcast-style module events
+    private String platformId;     // target user, nullable for broadcast-style module events
     private Map<String, Object> payload;
     private Instant timestamp;
 }

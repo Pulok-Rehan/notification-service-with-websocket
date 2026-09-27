@@ -36,9 +36,9 @@ public class Notification {
     private String sender;
 
     @Indexed
-    private String receiverMobile;       // unicast target (mobileNumber)
+    private String receiverPlatformId;       // unicast target (platformId)
 
-    private List<String> receiverMobiles; // multicast targets
+    private List<String> receiverPlatformIds; // multicast targets
 
     @Indexed
     private String topic;

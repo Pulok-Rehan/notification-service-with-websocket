@@ -18,7 +18,7 @@ public interface NotificationService {
 
     NotificationResponse schedule(NotificationRequest request);
 
-    PageResponse<NotificationResponse> getHistory(String mobile, NotificationHistoryFilter filter);
+    PageResponse<NotificationResponse> getHistory(String platformId, NotificationHistoryFilter filter);
 
     NotificationResponse getById(String id);
 
@@ -28,9 +28,9 @@ public interface NotificationService {
 
     NotificationResponse markAsRead(String id);
 
-    void markAllAsRead(String mobile);
+    void markAllAsRead(String platformId);
 
     NotificationResponse markAsUnread(String id);
 
-    UnreadCountResponse getUnreadCount(String mobile);
+    UnreadCountResponse getUnreadCount(String platformId);
 }

@@ -45,14 +45,14 @@ class NotificationServiceImplTest {
     @Test
     void sendUnicast_persistsAndIncrementsUnreadCount() {
         NotificationRequest request = NotificationRequest.builder()
-                .title("Hello").body("World").receiverMobile("8801711000000").build();
+                .title("Hello").body("World").receiverPlatformId("8801711000000").build();
 
-        Notification entity = Notification.builder().receiverMobile("8801711000000").build();
+        Notification entity = Notification.builder().receiverPlatformId("8801711000000").build();
         when(notificationMapper.toEntity(request)).thenReturn(entity);
         when(notificationRepository.save(any())).thenReturn(entity);
         when(unreadCountService.increment("8801711000000")).thenReturn(1L);
         when(notificationMapper.toResponse(any())).thenReturn(
-                com.company.notification.dto.NotificationResponse.builder().receiverMobile("8801711000000").build());
+                com.company.notification.dto.NotificationResponse.builder().receiverPlatformId("8801711000000").build());
 
         notificationService.sendUnicast(request);
 

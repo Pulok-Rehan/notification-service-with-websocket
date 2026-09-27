@@ -18,9 +18,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void subscribe(SubscriptionRequest request) {
-        if (!subscriptionRepository.existsByMobileAndTopic(request.getMobile(), request.getTopic())) {
+        if (!subscriptionRepository.existsByPlatformIdAndTopic(request.getPlatformId(), request.getTopic())) {
             subscriptionRepository.save(Subscription.builder()
-                    .mobile(request.getMobile())
+                    .platformId(request.getPlatformId())
                     .topic(request.getTopic())
                     .subscribedAt(Instant.now())
                     .build());
@@ -29,11 +29,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void unsubscribe(SubscriptionRequest request) {
-        subscriptionRepository.deleteByMobileAndTopic(request.getMobile(), request.getTopic());
+        subscriptionRepository.deleteByPlatformIdAndTopic(request.getPlatformId(), request.getTopic());
     }
 
     @Override
-    public List<String> listSubscriptions(String mobile) {
-        return subscriptionRepository.findByMobile(mobile).stream().map(Subscription::getTopic).toList();
+    public List<String> listSubscriptions(String platformId) {
+        return subscriptionRepository.findByPlatformId(platformId).stream().map(Subscription::getTopic).toList();
     }
 }

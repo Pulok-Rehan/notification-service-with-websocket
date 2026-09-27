@@ -18,9 +18,9 @@ public class PresenceController {
 
     private final PresenceService presenceService;
 
-    @GetMapping("/{mobile}")
-    public ApiResponse<PresenceResponse> getPresence(@PathVariable String mobile) {
-        return ApiResponse.success(presenceService.getPresence(mobile));
+    @GetMapping("/{platformId}")
+    public ApiResponse<PresenceResponse> getPresence(@PathVariable String platformId) {
+        return ApiResponse.success(presenceService.getPresence(platformId));
     }
 
     @GetMapping("/online")

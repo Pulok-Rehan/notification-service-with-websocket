@@ -18,18 +18,18 @@ public class WebSocketNotifier {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void sendToUser(String mobile, NotificationResponse notification) {
-        log.info("Sending notification to user: {}", mobile);
-        messagingTemplate.convertAndSendToUser(mobile, "/queue/notifications", notification);
+    public void sendToUser(String platformId, NotificationResponse notification) {
+        log.info("Sending notification to user: {}", platformId);
+        messagingTemplate.convertAndSendToUser(platformId, "/queue/notifications", notification);
     }
 
-    public void sendUnreadCount(String mobile, long unreadCount) {
-        log.info("Sending unread count to user: {}", mobile);
-        messagingTemplate.convertAndSendToUser(mobile, "/queue/updates", new java.util.HashMap<>() {{
+    public void sendUnreadCount(String platformId, long unreadCount) {
+        log.info("Sending unread count to user: {}", platformId);
+        messagingTemplate.convertAndSendToUser(platformId, "/queue/updates", new java.util.HashMap<>() {{
             put("eventType", "UNREAD_COUNT");
             put("unreadCount", unreadCount);
         }});
-        log.info("Sent unread count to user: {}", mobile);
+        log.info("Sent unread count to user: {}", platformId);
     }
 
     public void broadcast(NotificationResponse notification) {
@@ -44,7 +44,7 @@ public class WebSocketNotifier {
         messagingTemplate.convertAndSend("/topic/" + module, message);
     }
 
-    public void sendUserUpdate(String mobile, WebSocketUpdateMessage message) {
-        messagingTemplate.convertAndSendToUser(mobile, "/queue/updates", message);
+    public void sendUserUpdate(String platformId, WebSocketUpdateMessage message) {
+        messagingTemplate.convertAndSendToUser(platformId, "/queue/updates", message);
     }
 }

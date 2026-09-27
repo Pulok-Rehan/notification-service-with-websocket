@@ -11,11 +11,11 @@ import org.springframework.web.socket.config.annotation.*;
  *
  * Topics:
  *   /topic/global, /topic/{module} (attendance, deposit, withdraw, ipo, dashboard, system...)
- *   /user/{mobile}/notifications, /user/{mobile}/updates  (user-specific queues)
+ *   /user/{platformId}/notifications, /user/{platformId}/updates  (user-specific queues)
  *
- * Clients connect to ws://host/ws (or /ws with SockJS) sending "Authorization: Bearer <jwt>"
- * either as a STOMP CONNECT header or query param; JwtHandshakeInterceptor + the channel
- * interceptor in WebSocketAuthChannelInterceptor extract mobileNumber from the token.
+ * Clients connect to ws://host/ws (or /ws with SockJS) sending "platformId: <id>" as a
+ * STOMP CONNECT header; PlatformAuthChannelInterceptor resolves it to the STOMP principal
+ * that makes the /user/{platformId}/... destinations and presence tracking work.
  */
 @Configuration
 @EnableWebSocketMessageBroker
@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 //    private final WebSocketAuthChannelInterceptor authChannelInterceptor;
 
-    private final MobileAuthChannelInterceptor mobileAuthChannelInterceptor;
+    private final PlatformAuthChannelInterceptor platformAuthChannelInterceptor;
     private final PresenceWebSocketEventListener presenceEventListener; // ensures bean wiring/eager init
 
     @Override
@@ -51,6 +51,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 //    }
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(mobileAuthChannelInterceptor);
+        registration.interceptors(platformAuthChannelInterceptor);
     }
 }

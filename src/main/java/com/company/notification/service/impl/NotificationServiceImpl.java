@@ -61,6 +61,8 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setChannel(defaultChannel(request));
         notification.setStatus(NotificationStatus.CREATED);
         notification.setCreatedAt(Instant.now());
+        notification.setData(request.getData());
+        notification.setClickAction(request.getClickAction());
         notification = notificationRepository.save(notification);
 
         dispatch(notification);
@@ -69,8 +71,8 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setSentAt(Instant.now());
         notification = notificationRepository.save(notification);
 
-        long unread = unreadCountService.increment(notification.getReceiverMobile());
-        webSocketNotifier.sendUnreadCount(notification.getReceiverMobile(), unread);
+        long unread = unreadCountService.increment(notification.getReceiverPlatformId());
+        webSocketNotifier.sendUnreadCount(notification.getReceiverPlatformId(), unread);
 
         return notificationMapper.toResponse(notification);
     }
@@ -91,13 +93,13 @@ public class NotificationServiceImpl implements NotificationService {
         saved.setSentAt(Instant.now());
         saved = notificationRepository.save(saved);
 
-        List<String> mobiles = saved.getReceiverMobiles() == null ? List.of() : saved.getReceiverMobiles();
-        for (String mobile : mobiles) {
-            long unread = unreadCountService.increment(mobile);
-            webSocketNotifier.sendUnreadCount(mobile, unread);
+        List<String> platformIds = saved.getReceiverPlatformIds() == null ? List.of() : saved.getReceiverPlatformIds();
+        for (String platformId : platformIds) {
+            long unread = unreadCountService.increment(platformId);
+            webSocketNotifier.sendUnreadCount(platformId, unread);
         }
         Notification finalSaved = saved;
-        return mobiles.stream().map(m -> notificationMapper.toResponse(finalSaved)).collect(Collectors.toList());
+        return platformIds.stream().map(m -> notificationMapper.toResponse(finalSaved)).collect(Collectors.toList());
     }
 
     @Override
@@ -137,7 +139,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationResponse> sendToRole(NotificationRequest request) {
-        List<String> mobiles = roleDirectoryService.getMobilesByRole(request.getRole());
+        List<String> platformIds = roleDirectoryService.getPlatformIdsByRole(request.getRole());
         NotificationRequest multicastRequest = NotificationRequest.builder()
                 .title(request.getTitle())
                 .body(request.getBody())
@@ -149,7 +151,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .priority(request.getPriority())
                 .channel(request.getChannel())
                 .sender(request.getSender())
-                .receiverMobiles(mobiles)
+                .receiverPlatformIds(platformIds)
                 .data(request.getData())
                 .ttl(request.getTtl())
                 .build();
@@ -169,12 +171,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public PageResponse<NotificationResponse> getHistory(String mobile, NotificationHistoryFilter filter) {
+    public PageResponse<NotificationResponse> getHistory(String platformId, NotificationHistoryFilter filter) {
         int page = Math.max(filter.getPage(), 0);
         int size = filter.getSize() > 0 ? Math.min(filter.getSize(), MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("receiverMobile").is(mobile).and("deleted").ne(true));
+        query.addCriteria(Criteria.where("receiverPlatformId").is(platformId).and("deleted").ne(true));
 
         if (filter.getStatus() != null) {
             query.addCriteria(Criteria.where("status").is(filter.getStatus()));
@@ -254,17 +256,17 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setStatus(NotificationStatus.READ);
         notification = notificationRepository.save(notification);
 
-        if (wasUnread && notification.getReceiverMobile() != null) {
-            long unread = unreadCountService.decrement(notification.getReceiverMobile());
-            webSocketNotifier.sendUnreadCount(notification.getReceiverMobile(), unread);
+        if (wasUnread && notification.getReceiverPlatformId() != null) {
+            long unread = unreadCountService.decrement(notification.getReceiverPlatformId());
+            webSocketNotifier.sendUnreadCount(notification.getReceiverPlatformId(), unread);
         }
         return notificationMapper.toResponse(notification);
     }
 
     @Override
-    public void markAllAsRead(String mobile) {
+    public void markAllAsRead(String platformId) {
         List<Notification> unread = notificationRepository
-                .findByReceiverMobileAndCreatedAtAfterAndDeletedFalse(mobile, Instant.EPOCH)
+                .findByReceiverPlatformIdAndCreatedAtAfterAndDeletedFalse(platformId, Instant.EPOCH)
                 .stream().filter(n -> n.getReadAt() == null).collect(Collectors.toList());
         Instant now = Instant.now();
         unread.forEach(n -> {
@@ -272,8 +274,8 @@ public class NotificationServiceImpl implements NotificationService {
             n.setStatus(NotificationStatus.READ);
         });
         notificationRepository.saveAll(unread);
-        unreadCountService.reset(mobile);
-        webSocketNotifier.sendUnreadCount(mobile, 0);
+        unreadCountService.reset(platformId);
+        webSocketNotifier.sendUnreadCount(platformId, 0);
     }
 
     @Override
@@ -284,22 +286,22 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setStatus(NotificationStatus.DELIVERED);
         notification = notificationRepository.save(notification);
 
-        if (wasRead && notification.getReceiverMobile() != null) {
-            long unread = unreadCountService.increment(notification.getReceiverMobile());
-            webSocketNotifier.sendUnreadCount(notification.getReceiverMobile(), unread);
+        if (wasRead && notification.getReceiverPlatformId() != null) {
+            long unread = unreadCountService.increment(notification.getReceiverPlatformId());
+            webSocketNotifier.sendUnreadCount(notification.getReceiverPlatformId(), unread);
         }
         return notificationMapper.toResponse(notification);
     }
 
     @Override
-    public UnreadCountResponse getUnreadCount(String mobile) {
+    public UnreadCountResponse getUnreadCount(String platformId) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("receiverMobile").is(mobile)
+        query.addCriteria(Criteria.where("receiverPlatformId").is(platformId)
                 .and("deleted").ne(true)
                 .and("readAt").is(null)
                 .and("status").nin(List.of(NotificationStatus.EXPIRED, NotificationStatus.DELETED)));
         long fromDb = mongoTemplate.count(query, Notification.class);
-        unreadCountService.set(mobile, fromDb);
+        unreadCountService.set(platformId, fromDb);
         return UnreadCountResponse.builder().unreadCount(fromDb).build();
     }
 
@@ -307,11 +309,11 @@ public class NotificationServiceImpl implements NotificationService {
      * Delivers any notifications created while the user was offline, called by the
      * websocket connect listener / a dedicated "sync" endpoint on reconnect.
      */
-    public void deliverPendingOnReconnect(String mobile) {
+    public void deliverPendingOnReconnect(String platformId) {
         List<Notification> pending = notificationRepository
-                .findByReceiverMobileAndCreatedAtAfterAndDeletedFalse(mobile, Instant.now().minusSeconds(86400))
+                .findByReceiverPlatformIdAndCreatedAtAfterAndDeletedFalse(platformId, Instant.now().minusSeconds(86400))
                 .stream().filter(n -> n.getReadAt() == null).collect(Collectors.toList());
-        pending.forEach(n -> webSocketNotifier.sendToUser(mobile, notificationMapper.toResponse(n)));
+        pending.forEach(n -> webSocketNotifier.sendToUser(platformId, notificationMapper.toResponse(n)));
     }
 
     private void dispatch(Notification notification) {

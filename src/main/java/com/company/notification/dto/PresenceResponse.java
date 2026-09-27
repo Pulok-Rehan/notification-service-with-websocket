@@ -10,7 +10,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PresenceResponse {
-    private String mobile;
+    private String platformId;
     private PresenceStatus status;
     private Instant lastSeen;
     private String device;

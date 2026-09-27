@@ -8,6 +8,6 @@ import java.util.List;
 public interface FcmTokenService {
     FcmToken register(FcmTokenRequest request);
     FcmToken update(FcmTokenRequest request);
-    void deleteToken(String mobile, String deviceId);
-    List<FcmToken> getTokens(String mobile);
+    void deleteToken(String platformId, String deviceId);
+    List<FcmToken> getTokens(String platformId);
 }

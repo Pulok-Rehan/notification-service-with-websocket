@@ -18,7 +18,6 @@ public interface NotificationMapper {
     @Mapping(target = "readAt", ignore = true)
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "expired", ignore = true)
-    @Mapping(target = "receiverMobiles", source = "receiverMobiles")
     Notification toEntity(NotificationRequest request);
 
     @Mapping(target = "read", expression = "java(entity.getReadAt() != null)")

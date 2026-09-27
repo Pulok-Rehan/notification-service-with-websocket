@@ -16,7 +16,7 @@ public class UserPreference {
     private String id;
 
     @Indexed(unique = true)
-    private String mobile;
+    private String platformId;
 
     @Builder.Default private boolean push = true;
     @Builder.Default private boolean websocket = true;

@@ -44,24 +44,24 @@ public class WebSocketNotificationSender implements NotificationSender {
             webSocketNotifier.sendToTopic(notification.getTopic(), notificationMapper.toResponse(notification));
             return;
         }
-        if (notification.isMulticast() && notification.getReceiverMobiles() != null) {
-            notification.getReceiverMobiles().forEach(mobile -> {
-                if (presenceService.isOnline(mobile)) {
-                    webSocketNotifier.sendToUser(mobile, notificationMapper.toResponse(notification));
+        if (notification.isMulticast() && notification.getReceiverPlatformIds() != null) {
+            notification.getReceiverPlatformIds().forEach(platformId -> {
+                if (presenceService.isOnline(platformId)) {
+                    webSocketNotifier.sendToUser(platformId, notificationMapper.toResponse(notification));
                 }
             });
             return;
         }
         log.info("Connected users: {}", simpUserRegistry.getUsers());
 
-        SimpUser user = simpUserRegistry.getUser(notification.getReceiverMobile());
+        SimpUser user = simpUserRegistry.getUser(notification.getReceiverPlatformId());
 
         log.info("User found = {}", user);
-        log.info("User {} is online: {}", notification.getReceiverMobile(), presenceService.isOnline(notification.getReceiverMobile()));
-        if (notification.getReceiverMobile() != null && presenceService.isOnline(notification.getReceiverMobile())) {
-            log.info("Sending notification to user {}", notification.getReceiverMobile());
-            webSocketNotifier.sendToUser(notification.getReceiverMobile(), notificationMapper.toResponse(notification));
-            log.info("Notification sent to user {}", notification.getReceiverMobile());
+        log.info("User {} is online: {}", notification.getReceiverPlatformId(), presenceService.isOnline(notification.getReceiverPlatformId()));
+        if (notification.getReceiverPlatformId() != null && presenceService.isOnline(notification.getReceiverPlatformId())) {
+            log.info("Sending notification to user {}", notification.getReceiverPlatformId());
+            webSocketNotifier.sendToUser(notification.getReceiverPlatformId(), notificationMapper.toResponse(notification));
+            log.info("Notification sent to user {}", notification.getReceiverPlatformId());
         }
     }
 }

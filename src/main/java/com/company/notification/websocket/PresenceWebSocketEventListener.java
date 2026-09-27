@@ -24,9 +24,9 @@ public class PresenceWebSocketEventListener {
     public void handleConnect(SessionConnectedEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         if (accessor.getUser() != null) {
-            String mobile = accessor.getUser().getName();
-            presenceService.markOnline(mobile, accessor.getSessionId(), "unknown", "unknown");
-            log.info("User connected: {}", mobile);
+            String platformId = accessor.getUser().getName();
+            presenceService.markOnline(platformId, accessor.getSessionId(), "unknown", "unknown");
+            log.info("User connected: {}", platformId);
         }
     }
 
@@ -34,9 +34,9 @@ public class PresenceWebSocketEventListener {
     public void handleDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         if (accessor.getUser() != null) {
-            String mobile = accessor.getUser().getName();
-            presenceService.markOffline(mobile);
-            log.info("User disconnected: {}", mobile);
+            String platformId = accessor.getUser().getName();
+            presenceService.markOffline(platformId);
+            log.info("User disconnected: {}", platformId);
         }
     }
 }

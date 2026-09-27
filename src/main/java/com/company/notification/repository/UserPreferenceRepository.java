@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface UserPreferenceRepository extends MongoRepository<UserPreference, String> {
-    Optional<UserPreference> findByMobile(String mobile);
+    Optional<UserPreference> findByPlatformId(String platformId);
 }

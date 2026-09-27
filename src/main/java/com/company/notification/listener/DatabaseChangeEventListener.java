@@ -44,9 +44,9 @@ public class DatabaseChangeEventListener {
             // Module-wide live feed (e.g. dashboards/lists watching /topic/attendance)
             webSocketNotifier.sendModuleUpdate(event.getModule(), update);
 
-            // Direct push to the specific user if this change targets one (mobileNumber)
-            if (event.getMobileNumber() != null && !event.getMobileNumber().isBlank()) {
-                webSocketNotifier.sendUserUpdate(event.getMobileNumber(), update);
+            // Direct push to the specific user if this change targets one (platformId)
+            if (event.getPlatformId() != null && !event.getPlatformId().isBlank()) {
+                webSocketNotifier.sendUserUpdate(event.getPlatformId(), update);
             }
         } catch (Exception e) {
             log.error("Failed to process database change event: {}", e.getMessage(), e);

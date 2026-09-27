@@ -15,30 +15,30 @@ public class UnreadCountService {
 
     private final StringRedisTemplate redisTemplate;
 
-    public long increment(String mobile) {
-        Long val = redisTemplate.opsForValue().increment(RedisKeys.unreadCount(mobile));
+    public long increment(String platformId) {
+        Long val = redisTemplate.opsForValue().increment(RedisKeys.unreadCount(platformId));
         return val == null ? 0 : val;
     }
 
-    public long decrement(String mobile) {
-        Long val = redisTemplate.opsForValue().decrement(RedisKeys.unreadCount(mobile));
+    public long decrement(String platformId) {
+        Long val = redisTemplate.opsForValue().decrement(RedisKeys.unreadCount(platformId));
         if (val != null && val < 0) {
-            redisTemplate.opsForValue().set(RedisKeys.unreadCount(mobile), "0");
+            redisTemplate.opsForValue().set(RedisKeys.unreadCount(platformId), "0");
             return 0;
         }
         return val == null ? 0 : val;
     }
 
-    public void set(String mobile, long count) {
-        redisTemplate.opsForValue().set(RedisKeys.unreadCount(mobile), String.valueOf(count));
+    public void set(String platformId, long count) {
+        redisTemplate.opsForValue().set(RedisKeys.unreadCount(platformId), String.valueOf(count));
     }
 
-    public void reset(String mobile) {
-        redisTemplate.opsForValue().set(RedisKeys.unreadCount(mobile), "0");
+    public void reset(String platformId) {
+        redisTemplate.opsForValue().set(RedisKeys.unreadCount(platformId), "0");
     }
 
-    public long get(String mobile) {
-        String val = redisTemplate.opsForValue().get(RedisKeys.unreadCount(mobile));
+    public long get(String platformId) {
+        String val = redisTemplate.opsForValue().get(RedisKeys.unreadCount(platformId));
         return val == null ? 0 : Long.parseLong(val);
     }
 }

@@ -30,13 +30,13 @@ public class FcmTokenController {
     }
 
     @DeleteMapping
-    public ApiResponse<Void> delete(@RequestParam String mobile, @RequestParam String deviceId) {
-        fcmTokenService.deleteToken(mobile, deviceId);
+    public ApiResponse<Void> delete(@RequestParam String platformId, @RequestParam String deviceId) {
+        fcmTokenService.deleteToken(platformId, deviceId);
         return ApiResponse.success(null);
     }
 
-    @GetMapping("/{mobile}")
-    public ApiResponse<List<FcmToken>> getTokens(@PathVariable String mobile) {
-        return ApiResponse.success(fcmTokenService.getTokens(mobile));
+    @GetMapping("/{platformId}")
+    public ApiResponse<List<FcmToken>> getTokens(@PathVariable String platformId) {
+        return ApiResponse.success(fcmTokenService.getTokens(platformId));
     }
 }

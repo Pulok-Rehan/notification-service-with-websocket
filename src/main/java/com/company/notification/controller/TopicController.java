@@ -30,8 +30,8 @@ public class TopicController {
         return ApiResponse.success(null);
     }
 
-    @GetMapping("/{mobile}")
-    public ApiResponse<List<String>> listSubscriptions(@PathVariable String mobile) {
-        return ApiResponse.success(subscriptionService.listSubscriptions(mobile));
+    @GetMapping("/{platformId}")
+    public ApiResponse<List<String>> listSubscriptions(@PathVariable String platformId) {
+        return ApiResponse.success(subscriptionService.listSubscriptions(platformId));
     }
 }

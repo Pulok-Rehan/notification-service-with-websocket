@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Cache-backed role -> mobileNumbers directory. In production replace getMobilesByRole's
+ * Cache-backed role -> platformIds directory. In production replace getPlatformIdsByRole's
  * cache-miss path with a REST call to the User Service; the @Cacheable annotation means
  * callers (NotificationServiceImpl) never need to change.
  */
@@ -20,14 +20,14 @@ public class RoleDirectoryServiceImpl implements RoleDirectoryService {
     private final ConcurrentHashMap<String, List<String>> roleCache = new ConcurrentHashMap<>();
 
     @Override
-    @Cacheable(value = "roleMobiles", key = "#role")
-    public List<String> getMobilesByRole(String role) {
+    @Cacheable(value = "rolePlatformIds", key = "#role")
+    public List<String> getPlatformIdsByRole(String role) {
         return roleCache.getOrDefault(role, List.of());
     }
 
     @Override
-    @CacheEvict(value = "roleMobiles", key = "#role")
-    public void cacheRoleMapping(String role, List<String> mobiles) {
-        roleCache.put(role, new CopyOnWriteArrayList<>(mobiles));
+    @CacheEvict(value = "rolePlatformIds", key = "#role")
+    public void cacheRoleMapping(String role, List<String> platformIds) {
+        roleCache.put(role, new CopyOnWriteArrayList<>(platformIds));
     }
 }

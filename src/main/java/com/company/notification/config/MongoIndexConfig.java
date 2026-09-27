@@ -20,16 +20,16 @@ public class MongoIndexConfig {
     @PostConstruct
     public void initIndexes() {
         mongoTemplate.indexOps("notifications")
-                .ensureIndex(new Index().on("receiverMobile", org.springframework.data.domain.Sort.Direction.ASC)
+                .ensureIndex(new Index().on("receiverPlatformId", org.springframework.data.domain.Sort.Direction.ASC)
                         .on("createdAt", org.springframework.data.domain.Sort.Direction.DESC));
         mongoTemplate.indexOps("notifications")
                 .ensureIndex(new Index().on("status", org.springframework.data.domain.Sort.Direction.ASC));
         mongoTemplate.indexOps("notifications")
                 .ensureIndex(new Index().on("topic", org.springframework.data.domain.Sort.Direction.ASC));
         mongoTemplate.indexOps("fcm_tokens")
-                .ensureIndex(new Index().on("mobile", org.springframework.data.domain.Sort.Direction.ASC));
+                .ensureIndex(new Index().on("platformId", org.springframework.data.domain.Sort.Direction.ASC));
         mongoTemplate.indexOps("subscriptions")
-                .ensureIndex(new Index().on("mobile", org.springframework.data.domain.Sort.Direction.ASC)
+                .ensureIndex(new Index().on("platformId", org.springframework.data.domain.Sort.Direction.ASC)
                         .on("topic", org.springframework.data.domain.Sort.Direction.ASC).unique());
     }
 }

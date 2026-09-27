@@ -11,16 +11,16 @@ import java.util.List;
 
 public interface NotificationRepository extends MongoRepository<Notification, String> {
 
-    Page<Notification> findByReceiverMobileAndDeletedFalseOrderByCreatedAtDesc(String receiverMobile, Pageable pageable);
+    Page<Notification> findByReceiverPlatformIdAndDeletedFalseOrderByCreatedAtDesc(String receiverPlatformId, Pageable pageable);
 
-    Page<Notification> findByReceiverMobileAndStatusAndDeletedFalseOrderByCreatedAtDesc(
-            String receiverMobile, NotificationStatus status, Pageable pageable);
+    Page<Notification> findByReceiverPlatformIdAndStatusAndDeletedFalseOrderByCreatedAtDesc(
+            String receiverPlatformId, NotificationStatus status, Pageable pageable);
 
-    long countByReceiverMobileAndStatusNotAndDeletedFalse(String receiverMobile, NotificationStatus status);
+    long countByReceiverPlatformIdAndStatusNotAndDeletedFalse(String receiverPlatformId, NotificationStatus status);
 
-    long countByReceiverMobileAndReadAtIsNullAndDeletedFalse(String receiverMobile);
+    long countByReceiverPlatformIdAndReadAtIsNullAndDeletedFalse(String receiverPlatformId);
 
-    List<Notification> findByReceiverMobileAndCreatedAtAfterAndDeletedFalse(String receiverMobile, Instant after);
+    List<Notification> findByReceiverPlatformIdAndCreatedAtAfterAndDeletedFalse(String receiverPlatformId, Instant after);
 
     List<Notification> findByScheduledAtBeforeAndStatus(Instant before, NotificationStatus status);
 

@@ -21,7 +21,7 @@ public class NotificationResponse {
     private NotificationPriority priority;
     private NotificationChannel channel;
     private String sender;
-    private String receiverMobile;
+    private String receiverPlatformId;
     private String topic;
     private String role;
     private NotificationStatus status;

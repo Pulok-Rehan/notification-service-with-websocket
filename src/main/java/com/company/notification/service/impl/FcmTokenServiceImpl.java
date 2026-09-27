@@ -33,9 +33,9 @@ public class FcmTokenServiceImpl implements FcmTokenService {
     public FcmToken register(FcmTokenRequest request) {
 
         FcmToken token = fcmTokenRepository
-                .findByMobile(request.getMobile())
+                .findByPlatformId(request.getPlatformId())
                 .orElseGet(() -> FcmToken.builder()
-                        .mobile(request.getMobile())
+                        .platformId(request.getPlatformId())
                         .createdAt(Instant.now())
                         .build());
 
@@ -55,12 +55,12 @@ public class FcmTokenServiceImpl implements FcmTokenService {
     }
 
     @Override
-    public void deleteToken(String mobile, String deviceId) {
-        fcmTokenRepository.deleteByMobileAndDeviceId(mobile, deviceId);
+    public void deleteToken(String platformId, String deviceId) {
+        fcmTokenRepository.deleteByPlatformIdAndDeviceId(platformId, deviceId);
     }
 
     @Override
-    public List<FcmToken> getTokens(String mobile) {
-        return fcmTokenRepository.findByMobileAndActiveTrue(mobile);
+    public List<FcmToken> getTokens(String platformId) {
+        return fcmTokenRepository.findByPlatformIdAndActiveTrue(platformId);
     }
 }

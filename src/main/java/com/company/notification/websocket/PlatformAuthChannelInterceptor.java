@@ -10,8 +10,13 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 
+/**
+ * Reads the platformId from the STOMP CONNECT frame's native "platformId" header and sets
+ * it as the Principal, so /user/{platformId}/queue/... destinations and presence tracking
+ * key on platformId. Falls back to the legacy "mobile" header for older clients.
+ */
 @Component
-public class MobileAuthChannelInterceptor implements ChannelInterceptor {
+public class PlatformAuthChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -21,14 +26,18 @@ public class MobileAuthChannelInterceptor implements ChannelInterceptor {
 
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
 
-            String mobile = accessor.getFirstNativeHeader("mobile");
+            String platformId = accessor.getFirstNativeHeader("platformId");
+            if (platformId == null || platformId.isBlank()) {
+                platformId = accessor.getFirstNativeHeader("mobile"); // legacy clients
+            }
 
-            if (mobile != null && !mobile.isBlank()) {
+            if (platformId != null && !platformId.isBlank()) {
 
+                final String identity = platformId;
                 accessor.setUser(new Principal() {
                     @Override
                     public String getName() {
-                        return mobile;
+                        return identity;
                     }
                 });
             }

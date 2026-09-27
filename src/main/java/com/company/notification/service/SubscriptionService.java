@@ -7,5 +7,5 @@ import java.util.List;
 public interface SubscriptionService {
     void subscribe(SubscriptionRequest request);
     void unsubscribe(SubscriptionRequest request);
-    List<String> listSubscriptions(String mobile);
+    List<String> listSubscriptions(String platformId);
 }

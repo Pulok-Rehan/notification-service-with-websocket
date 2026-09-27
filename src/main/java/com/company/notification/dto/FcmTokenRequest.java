@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class FcmTokenRequest {
     @NotBlank
-    private String mobile;
+    private String platformId;
     @NotBlank
     private String deviceId;
     private DeviceType deviceType;
